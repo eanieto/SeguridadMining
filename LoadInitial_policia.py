@@ -4,7 +4,7 @@ import psycopg2
 from sqlalchemy import create_engine
 
 
-path = "D:\Ambientes\correlaciones_fuentes\\";
+path = "D:\Ambientes\correlaciones_fuentes\Policia\CSV\\";
 engine = create_engine('postgresql+psycopg2://postgres:qwerty@127.0.0.1:5432/correlacion_DB');
 
 
