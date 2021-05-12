@@ -1,3 +1,4 @@
+
 CREATE OR REPLACE VIEW vw_general_unificada AS
 SELECT
        A.departamento,
@@ -38,7 +39,7 @@ LEFT JOIN (
 GROUP BY 1,2
 ORDER BY 1;
 
-
+SELECT DISTINCT departamento, DELITO FROM vw_delitos_policia
 
 /*
 Limpieza de tabla de procesos judiciales
@@ -52,6 +53,8 @@ where "DEPARTAMENTO" = 'VALLE';
 UPDATE depuracion_procesos_judiciales
 SET"DEPARTAMENTO" = 'SAN ANDRÉS'
 WHERE "DEPARTAMENTO" = 'Archipiélago de San Andrés, Providencia y Santa Catalina';
+
+DELETE FROM depuracion_procesos_judiciales WHERE "DEPARTAMENTO" IS NULL
 
 UPDATE depuracion_procesos_judiciales
 SET"DEPARTAMENTO" = 'VALLE'
@@ -119,3 +122,12 @@ UPDATE sc_fuentes_data.migracion_venezolanos
 SET "DEPARTAMENTO" = 'VALLE'
 WHERE "DEPARTAMENTO" = 'Valle del Cauca';
 
+select * from sc_fuentes_data.vw_general_unificada
+
+
+SELECT DISTINCT "ANIO_HECHO" FROM procesos_judiciales
+
+
+select * from migracion_venezolanos
+
+SELECT * FROM procesos_judiciales
