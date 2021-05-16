@@ -312,7 +312,7 @@ GROUP BY 1,2,3,4
 
 
 SELECT *
-FROM vw_delitos_policia;
+FROM sc_fuentes_data.vw_delitos_policia;
 
 
 DELETE FROM hurto_a_comercio_2017_0 WHERE "DEPARTAMENTO" = 'TOTAL';
