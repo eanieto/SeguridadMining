@@ -105,11 +105,45 @@ true var_version_actual
 from bodega.dim_etiquetas_t1
 where
 var_nombre_etiqueta in('Armas y medios','Genero','Grupo edad');
+/*Carga dimensiopn de divipola segun delitos policia*/
+
+INSERT INTO bodega.dim_divipola_t1(var_nombre_pais, var_nombre_departamento, var_nombre_municipio)
+WITH divipola as (
+    SELECT DISTINCT "DEPARTAMENTO",
+                    CASE
+                        WHEN "MUNICIPIO" LIKE '%(CT)%' THEN SUBSTRING("MUNICIPIO", 1, position('(' in "MUNICIPIO") - 2)
+                        ELSE "MUNICIPIO" END "MUNICIPIO"
+    FROM sc_fuentes_data.hurto_a_personas_2017_2 LETICIA (CT)
+
+    UNION ALL
+    SELECT DISTINCT "DEPARTAMENTO",
+                    CASE
+                        WHEN "MUNICIPIO" LIKE '%(CT)%' THEN SUBSTRING("MUNICIPIO", 1, position('(' in "MUNICIPIO") - 2)
+                        ELSE "MUNICIPIO" END "MUNICIPIO"
+    FROM sc_fuentes_data.hurto_a_personas_2018_1
+    UNION ALL
+    SELECT DISTINCT "DEPARTAMENTO",
+                    CASE
+                        WHEN "MUNICIPIO" LIKE '%(CT)%' THEN SUBSTRING("MUNICIPIO", 1, position('(' in "MUNICIPIO") - 2)
+                        ELSE "MUNICIPIO" END "MUNICIPIO"
+    FROM sc_fuentes_data.hurto_a_personas_2019_0
+    UNION ALL
+    SELECT DISTINCT "DEPARTAMENTO",
+                    CASE
+                        WHEN "MUNICIPIO" LIKE '%(CT)%' THEN SUBSTRING("MUNICIPIO", 1, position('(' in "MUNICIPIO") - 2)
+                        ELSE "MUNICIPIO" END "MUNICIPIO"
+    FROM sc_fuentes_data.hurto_personas_2020
+)
+select distinct 'COLOMBIA',"DEPARTAMENTO", "MUNICIPIO"
+from divipola
+left join bodega.dim_divipola_t1 dp on "DEPARTAMENTO" = var_nombre_departamento and "MUNICIPIO" = var_nombre_municipio
+where dp.sk_divipola is null
+;
 
 /*
 Carga de hechos para los hurtos
   */
-
+--insert into bodega.fact_analisis_metricas(sk_tiempo, sk_divipola, sk_metrica, sk_fuente, num_valor_metrica, num_factor_incidencia)
 WITH hurtos as (
     SELECT "DEPARTAMENTO",
            CASE WHEN "MUNICIPIO" LIKE '%(CT)%' THEN SUBSTRING ( "MUNICIPIO" ,1,position('(' in "MUNICIPIO")-2) ELSE "MUNICIPIO" END "MUNICIPIO",
@@ -150,34 +184,26 @@ WITH hurtos as (
     FROM sc_fuentes_data.hurto_personas_2020
 ), metricas as (
     select
-    sk_metrica,var_nombre_metrica,var_nombre_etiqueta, var_nombre_detalle
+    sk_metrica,var_nombre_metrica,var_nombre_etiqueta, var_nombre_detalle,'Policia-Nacional' fuente
     from  bodega.dim_metricas_t2 m
     inner join bodega.dim_etiquetas_t1 d on m.sk_etiqueta = d.sk_etiqueta
     )
 
--- select
--- -- count(*)
--- to_char(date_trunc('month',to_date("FECHA HECHO", 'dd/mm/yyyy')),'YYYYMM')sk_fecha,
--- dp.sk_divipola,
--- metricas.sk_metrica,
--- sum("CANTIDAD") num_valor_metrica
--- from hurtos h
--- left join bodega.dim_divipola_t1 dp on h."DEPARTAMENTO" = dp.var_nombre_departamento and h."MUNICIPIO" = dp.var_nombre_municipio
--- left join metricas
---     on metricas.var_nombre_metrica = 'Conteo de Hurtos' and h."ARMAS MEDIOS" = metricas.var_nombre_detalle and metricas.var_nombre_etiqueta = 'Armas y medios'
--- where dp.sk_divipola is not null and metricas.sk_metrica is not null
--- group by 1,2,3
 select
 -- count(*)
-distinct
-h."DEPARTAMENTO",h."MUNICIPIO"
+cast(to_char(date_trunc('month',to_date("FECHA HECHO", 'dd/mm/yyyy')),'YYYYMM') as int )sk_fecha,
+dp.sk_divipola,
+metricas.sk_metrica,
+f.sk_fuente,
+sum("CANTIDAD") num_valor_metrica,
+0 as num_factor_incidencia
 from hurtos h
 left join bodega.dim_divipola_t1 dp on h."DEPARTAMENTO" = dp.var_nombre_departamento and h."MUNICIPIO" = dp.var_nombre_municipio
 left join metricas
     on metricas.var_nombre_metrica = 'Conteo de Hurtos' and h."ARMAS MEDIOS" = metricas.var_nombre_detalle and metricas.var_nombre_etiqueta = 'Armas y medios'
-where dp.sk_divipola is null
-  or metricas.sk_metrica is null
--- group by 1,2,3
+left join bodega.dim_fuente_t1 f on f.var_nombre_fuente = metricas.fuente
+where dp.sk_divipola is not null and metricas.sk_metrica is not null
+group by 1,2,3,4
 
 
-select * from bodega.dim_tiempo_t1
+select count(*) from bodega.fact_analisis_metricas
