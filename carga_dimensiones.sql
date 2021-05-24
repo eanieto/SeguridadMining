@@ -11,11 +11,20 @@ SELECT
 FROM sc_fuentes_data.divipola;
 
 select * from bodega.DIM_DIVIPOLA_T1;
+
+INSERT INTO bodega.dim_divipola_t1(var_nombre_pais, var_nombre_departamento, var_nombre_municipio)
+VALUES
+('COLOMBIA','Indeterminado','Indeterminado')
 /*
 Carga de Dimension de tiempo
 */
 INSERT INTO bodega.dim_tiempo_t1(sk_tiempo,num_anio, num_mes, var_nombre_mes)
 VALUES
+       (20160101,2016,0,'Indeterminado'),
+       (20170101,2017,0,'Indeterminado'),
+       (20180101,2018,0,'Indeterminado'),
+       (20190101,2019,0,'Indeterminado'),
+       (20200101,2020,0,'Indeterminado'),
 (201601,2016,1,'Enero'),
 (201602,2016,2,'Febrero'),
 (201603,2016,3,'Marzo'),
